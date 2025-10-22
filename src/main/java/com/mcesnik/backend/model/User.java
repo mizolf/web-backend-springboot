@@ -45,18 +45,6 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public String getEmail(){
-        return email;
-    }
-
-    public String getUsername(){
-        return username;
-    }
-
-    public String getPassword(){
-        return password;
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
         return List.of();
