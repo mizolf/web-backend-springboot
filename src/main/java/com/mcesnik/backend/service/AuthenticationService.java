@@ -36,7 +36,7 @@ public class AuthenticationService {
 
     public User signUp(RegisterUserDTO input){
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
-        user.setVerification_code(generateVerificationCode());
+        user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(30));
         user.setEnabled(false);
         sendVerificationEmail(user);
@@ -51,7 +51,7 @@ public class AuthenticationService {
 
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
-        String verificationCode = "VERIFICATION CODE " + user.getVerification_code();
+        String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
         String htmlMessage = "<html>"
                 + "<body style=\"font-family: Arial, sans-serif;\">"
                 + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
@@ -96,9 +96,9 @@ public class AuthenticationService {
             if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
                 throw new RuntimeException("Verification code has expired");
             }
-            if (user.getVerification_code().equals(input.getVerificationCode())) {
+            if (user.getVerificationCode().equals(input.getVerificationCode())) {
                 user.setEnabled(true);
-                user.setVerification_code(null);
+                user.setVerificationCode(null);
                 user.setVerificationCodeExpiresAt(null);
                 userRepository.save(user);
             } else {
@@ -116,7 +116,7 @@ public class AuthenticationService {
             if (user.isEnabled()) {
                 throw new RuntimeException("Account is already verified");
             }
-            user.setVerification_code(generateVerificationCode());
+            user.setVerificationCode(generateVerificationCode());
             user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
             sendVerificationEmail(user);
             userRepository.save(user);
