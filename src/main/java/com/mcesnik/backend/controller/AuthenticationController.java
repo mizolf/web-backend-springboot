@@ -8,11 +8,18 @@ import com.mcesnik.backend.model.User;
 import com.mcesnik.backend.reponses.LoginResponse;
 import com.mcesnik.backend.service.AuthenticationService;
 import com.mcesnik.backend.service.JwtService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RequestMapping("/auth")
 @RestController
@@ -32,10 +39,28 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDTO loginUserDTO){
+    public ResponseEntity<LoginResponse> authenticate(
+            @RequestBody LoginUserDTO loginUserDTO,
+            HttpServletResponse response,
+            CsrfToken csrfToken
+    ){
         User authenticatedUser = authenticationService.authenticate(loginUserDTO);
         String jwtToken = jwtService.generateToken(authenticatedUser);
-        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
+
+        ResponseCookie jwtCookie = ResponseCookie.from("jwt", jwtToken)
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(60*60)
+            .sameSite("Lax")
+            .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setMessage("Login successful");
+        loginResponse.setExpiresIn(jwtService.getExpirationTime());
+
         return ResponseEntity.ok(loginResponse);
     }
 
@@ -57,5 +82,20 @@ public class AuthenticationController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        ResponseCookie jwtCookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 }
