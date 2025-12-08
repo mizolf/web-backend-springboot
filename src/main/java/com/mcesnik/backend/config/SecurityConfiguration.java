@@ -47,9 +47,10 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfTokenRepository)
                         .csrfTokenRequestHandler(requestHandler)
+                        .ignoringRequestMatchers("/api/auth/**")
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()              // Require auth for everything else
                 )
                 .authenticationProvider(authenticationProvider)
