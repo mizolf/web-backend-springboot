@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
 @RequestMapping("/api/decks")
 public class DeckController {
     private DeckService deckService;
@@ -21,7 +22,7 @@ public class DeckController {
         this.deckService = deckService;
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<DeckResponse> createDeck(
             @RequestBody CreateDeckRequest request,
             @AuthenticationPrincipal User user
@@ -30,7 +31,7 @@ public class DeckController {
         return ResponseEntity.ok(new DeckResponse(deck));
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<DeckResponse>> getMyDecks(
             @AuthenticationPrincipal User user
     ) {
