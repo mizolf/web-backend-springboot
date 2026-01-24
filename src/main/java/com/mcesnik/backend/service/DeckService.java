@@ -6,10 +6,12 @@ import com.mcesnik.backend.model.Deck;
 import com.mcesnik.backend.model.User;
 import com.mcesnik.backend.repository.DeckRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class DeckService {
     private final DeckRepository deckRepository;
 

@@ -18,7 +18,7 @@ public record DeckResponse (
                 deck.getName(),
                 deck.getIsPublic(),
                 deck.getCreatedAt(),
-                deck.getCards().size()
+                deck.getCards() != null ? deck.getCards().size() : 0
         );
     }
 }
