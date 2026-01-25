@@ -3,6 +3,7 @@ package com.mcesnik.backend.controller;
 
 import com.mcesnik.backend.DTO.LoginUserDTO;
 import com.mcesnik.backend.DTO.RegisterUserDTO;
+import com.mcesnik.backend.DTO.UserResponse;
 import com.mcesnik.backend.DTO.VerifiedUserDTO;
 import com.mcesnik.backend.model.User;
 import com.mcesnik.backend.reponses.LoginResponse;
@@ -33,9 +34,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterUserDTO registerUserDTO){
+    public ResponseEntity<UserResponse> register(@RequestBody RegisterUserDTO registerUserDTO){
         User registeredUser = authenticationService.signUp(registerUserDTO);
-        return ResponseEntity.ok(registeredUser);
+        return ResponseEntity.ok(new UserResponse(registeredUser));
     }
 
     @PostMapping("/login")
