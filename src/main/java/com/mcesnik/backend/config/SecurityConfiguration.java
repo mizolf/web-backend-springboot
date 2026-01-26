@@ -10,10 +10,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -22,6 +23,9 @@ import java.util.List;
 public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Value("${security.csrf.secure-cookie:false}")
+    private boolean csrfSecureCookie;
 
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -33,12 +37,11 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
-        requestHandler.setCsrfRequestAttributeName("_csrf");
+        SpaCsrfTokenRequestHandler requestHandler = new SpaCsrfTokenRequestHandler();
 
         CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrfTokenRepository.setCookieCustomizer(cookie -> cookie
-                .secure(true)
+                .secure(csrfSecureCookie)
                 .sameSite("Strict")
         );
 
@@ -51,7 +54,7 @@ public class SecurityConfiguration {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().authenticated()              // Require auth for everything else
+                        .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
