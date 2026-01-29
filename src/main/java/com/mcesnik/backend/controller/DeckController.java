@@ -37,9 +37,10 @@ public class DeckController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "9") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) Boolean isPublic
     ) {
-        Page<Deck> decks = deckService.getMyDecksFiltered(user, page, size, sortBy, sortDir);
+        Page<Deck> decks = deckService.getMyDecksFiltered(user, page, size, sortBy, sortDir, isPublic);
         return ResponseEntity.ok(PageResponse.from(decks, DeckResponse::new));
     }
 

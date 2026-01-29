@@ -113,14 +113,20 @@ public class DeckService {
     }
 
     public Page<Deck> getMyDecksFiltered(User owner, int page, int size,
-                                          String sortBy, String sortDir) {
+                                          String sortBy, String sortDir, Boolean isPublic) {
         List<Deck> allDecks = deckRepository.findByOwner(owner);
+
+        Stream<Deck> stream = allDecks.stream();
+        if (isPublic != null) {
+            stream = stream.filter(deck -> deck.getIsPublic().equals(isPublic));
+        }
+        List<Deck> filtered = stream.toList();
 
         List<Deck> sorted;
         if ("averageDifficulty".equals(sortBy)) {
-            sorted = sortDecksByAverageDifficulty(allDecks, sortDir);
+            sorted = sortDecksByAverageDifficulty(filtered, sortDir);
         } else {
-            sorted = sortDecks(allDecks, sortBy, sortDir);
+            sorted = sortDecks(filtered, sortBy, sortDir);
         }
 
         return toPage(sorted, page, size);
