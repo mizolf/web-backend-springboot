@@ -3,15 +3,15 @@ package com.mcesnik.backend.controller;
 import com.mcesnik.backend.DTO.CreateDeckRequest;
 import com.mcesnik.backend.DTO.DeckDetailResponse;
 import com.mcesnik.backend.DTO.DeckResponse;
+import com.mcesnik.backend.DTO.PageResponse;
 import com.mcesnik.backend.DTO.UpdateDeckRequest;
 import com.mcesnik.backend.model.Deck;
 import com.mcesnik.backend.model.User;
 import com.mcesnik.backend.service.DeckService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/decks")
@@ -32,13 +32,15 @@ public class DeckController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DeckResponse>> getMyDecks(
-            @AuthenticationPrincipal User user
+    public ResponseEntity<PageResponse<DeckResponse>> getMyDecks(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "9") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
     ) {
-        List<Deck> decks = deckService.getDecksByOwner(user);
-        return ResponseEntity.ok(decks.stream()
-                .map(DeckResponse::new)
-                .toList());
+        Page<Deck> decks = deckService.getMyDecksFiltered(user, page, size, sortBy, sortDir);
+        return ResponseEntity.ok(PageResponse.from(decks, DeckResponse::new));
     }
 
 
@@ -68,10 +70,16 @@ public class DeckController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<DeckResponse>> getPublicDecks() {
-        List<Deck> decks = deckService.getPublicDecks();
-        return ResponseEntity.ok(decks.stream()
-                .map(DeckResponse::new)
-                .toList());
+    public ResponseEntity<PageResponse<DeckResponse>> getPublicDecks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "9") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) String sizeFilter,
+            @RequestParam(required = false) Integer minCards
+    ) {
+        Page<Deck> decks = deckService.getPublicDecksFiltered(
+                page, size, sortBy, sortDir, sizeFilter, minCards);
+        return ResponseEntity.ok(PageResponse.from(decks, DeckResponse::new));
     }
 }

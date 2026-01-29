@@ -1,4 +1,4 @@
-package com.mcesnik.backend.reponses;
+package com.mcesnik.backend.responses;
 
 import lombok.Getter;
 import lombok.Setter;
