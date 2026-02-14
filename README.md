@@ -1,6 +1,6 @@
 # Flashcards Learning Platform - Backend
 
-REST API backend for a flashcards learning web application built with Spring Boot.
+REST API backend for a flashcards learning web application built with Spring Boot. Features AI-powered automatic flashcard generation from text or PDF documents using Google Gemini.
 
 ## Tech Stack
 
@@ -9,6 +9,8 @@ REST API backend for a flashcards learning web application built with Spring Boo
 - **PostgreSQL 16**
 - **Spring Security + JWT**
 - **Spring Data JPA**
+- **Spring AI 1.1.1 + Google Gemini**
+- **Apache PDFBox 3.0.4**
 - **Gradle 8.11**
 
 ## Quick Start with Docker
@@ -62,6 +64,7 @@ cp .env.example .env
 | `SUPPORT_EMAIL` | Gmail address for sending emails | `your_email@gmail.com` |
 | `APP_PASSWORD` | Gmail app password | `your_app_password` |
 | `CSRF_SECURE_COOKIE` | CSRF cookie secure flag | `false` (dev) / `true` (prod) |
+| `GEMINI_API_KEY` | Google Gemini API key ([get one here](https://aistudio.google.com/apikey)) | `your_api_key` |
 
 ## API Documentation
 
@@ -124,6 +127,21 @@ cp .env.example .env
 | POST | `/api/decks/{deckId}/learn/start` | Start learning session |
 | POST | `/api/decks/{deckId}/learn/submit` | Submit answers and get stats |
 
+### AI Card Generation
+
+| Method | Endpoint | Content-Type | Description |
+|--------|----------|-------------|-------------|
+| POST | `/api/decks/{deckId}/ai-cards/generate` | `application/json` | Generate cards from text (preview) |
+| POST | `/api/decks/{deckId}/ai-cards/generate-from-pdf` | `multipart/form-data` | Generate cards from PDF (preview) |
+| POST | `/api/decks/{deckId}/ai-cards/save` | `application/json` | Save selected generated cards |
+| POST | `/api/decks/{deckId}/ai-cards/generate-and-save` | `application/json` | Generate and save from text directly |
+| POST | `/api/decks/{deckId}/ai-cards/generate-and-save-from-pdf` | `multipart/form-data` | Generate and save from PDF directly |
+
+- AI automatically detects content language and generates cards in the same language
+- Card count adapts to content length: short (3-5), medium (5-15), long (10-30)
+- PDF upload limit: 10MB, text limit: 50,000 characters
+- Only deck owner can generate cards
+
 ## Response Format
 
 ### Paginated Response
@@ -151,6 +169,39 @@ cp .env.example .env
   "cardCount": 25,
   "ownerUsername": "john_doe",
   "averageDifficulty": 2.4
+}
+```
+
+### AI Generate Response
+
+```json
+{
+  "cards": [
+    {
+      "question": "What is photosynthesis?",
+      "answer": "The process by which plants convert sunlight into chemical energy.",
+      "tag": "Biology",
+      "difficulty": 1
+    }
+  ],
+  "totalGenerated": 1
+}
+```
+
+### AI Save Response
+
+```json
+{
+  "savedCards": [
+    {
+      "id": 502,
+      "question": "What is photosynthesis?",
+      "answer": "The process by which plants convert sunlight into chemical energy.",
+      "tag": "Biology",
+      "difficulty": 1
+    }
+  ],
+  "totalSaved": 1
 }
 ```
 
