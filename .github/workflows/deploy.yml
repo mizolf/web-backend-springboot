@@ -45,7 +45,7 @@ jobs:
         uses: google-github-actions/get-gke-credentials@v2
         with:
           cluster_name: my-cluster
-          location: us_central1-a
+          location: us-central1-a
 
       - name: Deploy to GKE
         run: kubectl set image deployment/my-backend my-backend=europe-west3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend-repo/backend:${{ github.sha }}
