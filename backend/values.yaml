@@ -1,0 +1,40 @@
+replicaCount: 3
+
+image:
+  repository: europe-west3-docker.pkg.dev/silken-sled-409718/backend-repo/backend
+  tag: v1.0
+  pullPolicy: IfNotPresent
+
+containerPort: 8080
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  host: myapp.local
+
+env:
+  - name: SPRING_DATASOURCE_URL
+    secretName: db-credentials
+    secretKey: url
+  - name: SPRING_DATASOURCE_USERNAME
+    secretName: db-credentials
+    secretKey: username
+  - name: SPRING_DATASOURCE_PASSWORD
+    secretName: db-credentials
+    secretKey: password
+  - name: JWT_SECRET_KEY
+    secretName: db-credentials
+    secretKey: jwt-secret
+  - name: SUPPORT_EMAIL
+    secretName: db-credentials
+    secretKey: support-email
+  - name: GEMINI_API_KEY
+    secretName: db-credentials
+    secretKey: gemini-api
+  - name: APP_PASSWORD
+    secretName: db-credentials
+    secretKey: app-password
